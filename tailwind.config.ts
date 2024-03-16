@@ -19,8 +19,8 @@ const config = {
     },
     extend: {
       colors: {
-        primary_main: "#7371FC",
-        secondary_main: "#7371FC",
+        primary_main: "#8377D1",
+        secondary_main: "#918EF4",
         tertiary_main: "#CDC1FF",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -23,9 +23,9 @@ function Header() {
                     <div className="flex items-center gap-4">
                         <div className="sm:flex sm:gap-4">
                             <OrganizationSwitcher />
-                            <UserButton />
+                            <UserButton afterSignOutUrl="/" />
                             <SignedOut>
-                                <SignInButton mode="modal">
+                                <SignInButton afterSignInUrl="/dashboard" mode="modal">
                                     <Button>Sign in</Button>
                                 </SignInButton>
                             </SignedOut>
