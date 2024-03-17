@@ -6,6 +6,7 @@ export default defineSchema({
         fileName: v.string(),
         fileId: v.id("_storage"),
         orgId: v.string(),
+        fileType: v.union(v.literal("image"), v.literal("pdf"), v.literal("csv"))
     }).index("by_orgid", ["orgId"]),
 
     users: defineTable({

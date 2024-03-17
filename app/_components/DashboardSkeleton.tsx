@@ -10,8 +10,8 @@ function DashboardSkeleton() {
             </div>
             <div className="mt-7 grid lg:grid-cols-4 md:grid-cols-4 sm:grid-cols-1 gap-5">
                 {
-                    [1,2,3,4].map(() => (
-                        <Skeleton className="h-[350px] w-[350px]" />
+                    [1,2,3,4].map((index) => (
+                        <Skeleton key={index} className="h-[350px] w-[350px]" />
                     ))
                 }
             </div>

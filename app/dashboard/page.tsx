@@ -28,33 +28,35 @@ function Dashboard() {
                     {
                         isLoading ? (
                             <DashboardSkeleton />
-                        ) : files ? (
+                        ) : (
+                            files.length > 0 ? (
                             <>
-                            <div className="flex-1">
-                                <div className="flex justify-between">
-                                    <h1 className="text-3xl font-bold">Your Files</h1>  
+                                <div className="flex-1">
+                                    <div className="flex justify-between">
+                                        <h1 className="text-3xl font-bold">Your Files</h1>  
+                                        <FileUpload />
+                                    </div>
+                                    <div className="mt-7 grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1 gap-5">
+                                        {
+                                            files?.map((file) => (
+                                                <FileCard key={file._id} file={file} />
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            </>
+                            ):(
+                                <div className="w-full h-full flex flex-col justify-center items-center py-14 gap-10">
+                                    <Image 
+                                    src="/empty-state.svg"
+                                    alt="Empty State - No files"
+                                    width={600}
+                                    height={600}
+                                    />
+                                    <h1 className="text-2xl font-bold">No files yet. Please upload one</h1>
                                     <FileUpload />
                                 </div>
-                                <div className="mt-7 grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1 gap-5">
-                                    {
-                                        files?.map((file) => (
-                                            <FileCard key={file._id} file={file} />
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                            </>
-                        ):(
-                            <div className="w-full h-full flex flex-col justify-center items-center py-14 gap-10">
-                                <Image 
-                                src="/empty-state.svg"
-                                alt="Empty State - No files"
-                                width={600}
-                                height={600}
-                                />
-                                <h1 className="text-2xl font-bold">No files yet. Please upload one</h1>
-                                <FileUpload />
-                            </div>
+                            )
                         )
                     }
                 </div>

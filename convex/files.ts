@@ -47,9 +47,10 @@ export const createFile = mutation({
         fileName: v.string(),
         fileId: v.id("_storage"),
         orgId: v.string(),
+        fileType: v.union(v.literal("image"), v.literal("pdf"), v.literal("csv"))
     },
     handler: async (ctx, args) => {
-        const {fileName, fileId, orgId} = args;
+        const {fileName, fileId, orgId, fileType} = args;
         const identity = await ctx.auth.getUserIdentity();
         if(!identity){
             throw new ConvexError("You are not authenticated to upload a file");
@@ -60,7 +61,7 @@ export const createFile = mutation({
             throw new ConvexError("You do not have access to this organization");
         }
 
-        const file = await ctx.db.insert('files', {fileName, fileId, orgId});
+        const file = await ctx.db.insert('files', {fileName, fileId, orgId, fileType});
         return file;
     },
 });

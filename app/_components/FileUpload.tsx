@@ -26,6 +26,7 @@ import { useOrganization, useUser } from '@clerk/nextjs'
 import { useState } from 'react'
 import { toast } from "sonner";
 import { LoaderCircle } from 'lucide-react'
+import { Doc } from '@/convex/_generated/dataModel'
 
 // https://medium.com/@damien_16960/input-file-x-shadcn-x-zod-88f0472c2b81
 
@@ -37,6 +38,12 @@ const formSchema = z.object({
             .custom<FileList>((file) => file instanceof FileList, "File is required.")
             .refine((file) => file?.length > 0, "File is required.")
 })
+
+const types= {
+    "image/png": "image",
+    "text/csv": "csv",
+    "application/pdf": "pdf",
+} as Record<string, Doc<"files">["fileType"]>;
 
 function FileUpload() {
     const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false);
@@ -65,18 +72,21 @@ function FileUpload() {
         if(!orgId) return;
 
         const postUrl = await generateUploadUrl();
+        const fileType = values.file[0].type;
         const result = await fetch(postUrl, {
             method: "POST",
-            headers: { "Content-Type": values.file[0].type },
+            headers: { "Content-Type": fileType },
             body: values.file[0],
         });
+
         const { storageId } = await result.json();
 
         try {
             await createFile({
                 fileName: values.title,
                 fileId: storageId,
-                orgId
+                orgId,
+                fileType: types[fileType]
             });
 
             toast.success(`File ${values.title} uploaded successfully`);
@@ -112,7 +122,7 @@ function FileUpload() {
                                     <FormItem>
                                         <FormLabel>Title</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Add a title" {...field} />
+                                            <Input className="text-black" placeholder="Add a title" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
