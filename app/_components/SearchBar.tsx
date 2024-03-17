@@ -33,7 +33,7 @@ function SearchBar({query, setQuery}: ISearchBarProps) {
             <Form {...form}>
                 <form 
                 onSubmit={form.handleSubmit(onSubmit)} 
-                className="flex items-center border rounded-lg p-1 overflow-hidden">
+                className="flex items-center border rounded-lg overflow-hidden">
                     <FormField
                     control={form.control}
                     name="query"
@@ -49,7 +49,7 @@ function SearchBar({query, setQuery}: ISearchBarProps) {
                         </FormItem>
                     )}
                     />
-                    <Button> <SearchIcon size={20} /> </Button>
+                    <Button size="sm" className="m-1"> <SearchIcon size={20} /> </Button>
                 </form>
             </Form>
         </>

@@ -31,7 +31,7 @@ export default function Home() {
                     Visit Dashboard
                   </Link>
                 ):(
-                  <SignInButton afterSignInUrl="/dashboard" mode="modal">
+                  <SignInButton afterSignInUrl="/dashboard/files" mode="modal">
                       <Button className="bg-secondary_main px-16 py-7 text-lg font-medium hover:bg-primary_main transition">Get Started</Button>
                   </SignInButton>
                 )
