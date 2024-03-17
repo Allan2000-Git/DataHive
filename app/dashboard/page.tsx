@@ -11,7 +11,6 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -21,12 +20,13 @@ import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useOrganization, useUser } from '@clerk/nextjs'
 import { useState } from 'react'
 import { toast } from "sonner";
 import { LoaderCircle } from 'lucide-react'
+import FileCard from '../_components/FileCard'
 
 // https://medium.com/@damien_16960/input-file-x-shadcn-x-zod-88f0472c2b81
 
@@ -49,6 +49,7 @@ function Dashboard() {
         orgId = organization?.id ?? user?.id;
     }
 
+    const files = useQuery(api.files.getAllFiles, orgId  ? {orgId} : "skip");
     const createFile = useMutation(api.files.createFile);
     const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
@@ -95,9 +96,16 @@ function Dashboard() {
     return (
         <>
             <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-10">
-                <div className="flex justify-between">
-                    <div>
+                <div className="flex justify-between gap-[40px]">
+                    <div className="flex-1">
                         <h1 className="text-3xl font-bold text-secondary_main">Your Files</h1>
+                        <div className="mt-7 grid lg:grid-cols-4 sm:grid-cols-1 gap-5">
+                            {
+                                files?.map((file) => (
+                                    <FileCard key={file._id} file={file} />
+                                ))
+                            }
+                        </div>
                     </div>
                     <div>
                         <Dialog open={isUploadFileModalOpen} onOpenChange={setIsUploadFileModalOpen}>
