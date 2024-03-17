@@ -34,9 +34,9 @@ import Image from "next/image";
 import { getFileUrl } from "@/lib/fileUrl"
 
 const iconTypes= {
-    image: <ImageIcon />,
-    csv: <SheetIcon />,
-    pdf:  <FileTextIcon />
+    image: <ImageIcon size={18} />,
+    csv: <SheetIcon size={18} />,
+    pdf:  <FileTextIcon size={18} />
 } as Record<Doc<"files">["fileType"], ReactNode>;
 
 function FileCard({file} : {file: Doc<"files">}) {
@@ -56,13 +56,13 @@ function FileCard({file} : {file: Doc<"files">}) {
             <div>
                 <CardHeader>
                     <div className="flex items-center gap-3 justify-between">
-                        <CardTitle className="text-lg flex items-center justify-between gap-3">
+                        <CardTitle className="text-[16px] flex items-center justify-between gap-3">
                             {iconTypes[file.fileType]}
                             {file.fileName}
                         </CardTitle>
                         <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <EllipsisVertical />
+                                <EllipsisVertical size={20} />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuItem 
@@ -95,15 +95,17 @@ function FileCard({file} : {file: Doc<"files">}) {
                     {
                         file.fileType === "image" && 
                         <Image 
+                        className="object-cover"
                         src={getFileUrl(file.fileId)}
                         alt={file.fileName}
-                        width={100}
-                        height={100}
+                        width={300}
+                        height={80}
                         />
                     }
                     {
                         file.fileType === "csv" && 
                         <Image 
+                        className="object-cover"
                         src="/csv-placeholder.png"
                         alt={file.fileName}
                         width={200}
@@ -113,6 +115,7 @@ function FileCard({file} : {file: Doc<"files">}) {
                     {
                         file.fileType === "pdf" && 
                         <Image 
+                        className="object-cover"
                         src="/pdf-placeholder.png"
                         alt={file.fileName}
                         width={200}

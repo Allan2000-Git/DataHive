@@ -23,9 +23,10 @@ export const generateUploadUrl = mutation(async (ctx) => {
 export const getAllFiles = query({
     args: {
         orgId: v.string(),
+        query: v.optional(v.string())
     },
     handler: async (ctx, args) => {
-        const {orgId} = args;
+        const {orgId, query} = args;
         const identity = await ctx.auth.getUserIdentity();
         if(!identity){
             return [];
@@ -37,7 +38,12 @@ export const getAllFiles = query({
         }
 
         // const files = await ctx.db.query("files").filter(file => file.eq(file.field("orgId"), orgId)).collect();
-        const files = await ctx.db.query("files").withIndex("by_orgid", (file) => file.eq("orgId", orgId)).collect();
+        let files = await ctx.db.query("files").withIndex("by_orgid", (file) => file.eq("orgId", orgId)).collect();
+
+        if(query){
+            files = files.filter((file) => file.fileName.toLowerCase().includes(query.toLowerCase()));
+        }
+
         return files;
     },
 });

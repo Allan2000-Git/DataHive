@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { useMutation, useQuery } from 'convex/react'
+import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useOrganization, useUser } from '@clerk/nextjs'
 import { useState } from 'react'
@@ -37,7 +37,7 @@ const formSchema = z.object({
     file:  z
             .custom<FileList>((file) => file instanceof FileList, "File is required.")
             .refine((file) => file?.length > 0, "File is required.")
-})
+});
 
 const types= {
     "image/png": "image",
@@ -69,7 +69,7 @@ function FileUpload() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
 
-        if(!orgId) return;
+        if(!orgId) return toast.success(`No organization found.`);
 
         const postUrl = await generateUploadUrl();
         const fileType = values.file[0].type;
@@ -105,55 +105,55 @@ function FileUpload() {
         <>
             <Dialog open={isUploadFileModalOpen} onOpenChange={setIsUploadFileModalOpen}>
                 <DialogTrigger asChild>
-                    <Button className="px-10 py-6 text-[16px]">Upload a File</Button>
+                    <Button className="px-6 py-6 text-[14px]">Upload a File</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold mb-6">Upload a File</DialogTitle>
-                    <DialogDescription>
-                        <Form {...form}>
-                            <form 
-                            onSubmit={form.handleSubmit(onSubmit)} 
-                            className="space-y-8">
-                                <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Title</FormLabel>
-                                        <FormControl>
-                                            <Input className="text-black" placeholder="Add a title" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                                <FormField
-                                control={form.control}
-                                name="file"
-                                render={() => (
-                                    <FormItem className="mt-3">
-                                        <FormLabel>File</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                            type="file" {...fileRef} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                                <Button 
-                                disabled={form.formState.isSubmitting}
-                                className="gap-2"
-                                type="submit">
-                                    {form.formState.isSubmitting ? "Uploading..." : "Upload"}
-                                    {
-                                        form.formState.isSubmitting && <LoaderCircle className="h-4 2-4 animate-spin" />
-                                    }
-                                </Button>
-                            </form>
-                        </Form>
-                    </DialogDescription>
+                        <DialogTitle className="text-xl font-semibold mb-6">Upload a File</DialogTitle>
+                        <DialogDescription>
+                            <Form {...form}>
+                                <form 
+                                onSubmit={form.handleSubmit(onSubmit)} 
+                                className="space-y-8">
+                                    <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Title</FormLabel>
+                                            <FormControl>
+                                                <Input className="text-black font-semibold text-[16px] placeholder:font-normal placeholder:text-sm" placeholder="Add a title" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                    <FormField
+                                    control={form.control}
+                                    name="file"
+                                    render={() => (
+                                        <FormItem className="mt-3">
+                                            <FormLabel>File</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                type="file" {...fileRef} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                    />
+                                    <Button 
+                                    disabled={form.formState.isSubmitting}
+                                    className="gap-2"
+                                    type="submit">
+                                        {form.formState.isSubmitting ? "Uploading..." : "Upload"}
+                                        {
+                                            form.formState.isSubmitting && <LoaderCircle className="h-4 2-4 animate-spin" />
+                                        }
+                                    </Button>
+                                </form>
+                            </Form>
+                        </DialogDescription>
                     </DialogHeader>
                 </DialogContent>
             </Dialog>
