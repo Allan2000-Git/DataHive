@@ -24,7 +24,7 @@ export default function Home() {
                 isSignedIn ? 
                 (
                   <Link
-                    className="block w-full rounded bg-secondary_main px-16 py-4 text-lg font-medium text-white shadow 
+                    className="block w-full rounded bg-secondary_main px-16 py-3 text-lg font-medium text-white shadow 
                     focus:outline-none focus:ring sm:w-auto hover:bg-primary_main transition"
                     href="/dashboard"
                   >
