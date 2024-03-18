@@ -25,7 +25,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Doc } from "@/convex/_generated/dataModel"
-import { EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, TrashIcon } from "lucide-react"
+import { EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, StarIcon, TrashIcon } from "lucide-react"
 import { ReactNode, useState } from "react"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
@@ -65,6 +65,12 @@ function FileCard({file} : {file: Doc<"files">}) {
                                 <EllipsisVertical size={20} />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
+                                <DropdownMenuItem
+                                className="flex items-center gap-3 text-yellow-600 cursor-pointer"
+                                >
+                                    <StarIcon size={16} /> 
+                                    Favorite
+                                </DropdownMenuItem>
                                 <DropdownMenuItem 
                                 onClick={() => setIsAlertOpen(true)}
                                 className="flex items-center gap-3 text-red-600 cursor-pointer"

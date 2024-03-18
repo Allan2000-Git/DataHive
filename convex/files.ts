@@ -97,3 +97,49 @@ export const deleteFile = mutation({
         return file;
     },
 });
+
+export const toggleFavorite = mutation({
+    args: {
+        fileId: v.id("files"),
+    },
+    handler: async (ctx, args) => {
+        const {fileId} = args;
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            throw new ConvexError("You are not authenticated to delete a file");
+        }
+
+        const currentFile = await ctx.db.get(fileId);
+        if(!currentFile){
+            throw new ConvexError("Requested file does not exist");
+        }
+
+        const hasAccess = await hasAccesstoOrg(ctx, identity.tokenIdentifier, currentFile.orgId);
+        if(!hasAccess){
+            throw new ConvexError("You do not have access to this organization");
+        }
+
+        const user = await ctx.db.query("users")
+                    .withIndex("by_token", (user) => user.eq("tokenIdentifier", identity.tokenIdentifier)).first();
+        
+        if(!user){
+            throw new ConvexError("No user found");
+        }
+
+        const favorite = await ctx.db.query("favorites")
+                        .withIndex("by_userId_orgId_fileId", (file) => file.eq("fileId", currentFile._id)
+                        .eq("orgId", currentFile.orgId).eq("userId", user?._id)).first();
+
+        if(!favorite){
+            await ctx.db.insert("favorites", {
+                fileId: currentFile._id,
+                orgId: currentFile.orgId,
+                userId: user?._id
+            })
+        }else{
+            await ctx.db.delete(favorite._id);
+        }
+
+        return favorite;
+    },
+});
