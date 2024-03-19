@@ -23,10 +23,11 @@ export const generateUploadUrl = mutation(async (ctx) => {
 export const getAllFiles = query({
     args: {
         orgId: v.string(),
-        query: v.optional(v.string())
+        query: v.optional(v.string()),
+        isFavorite: v.optional(v.boolean())
     },
     handler: async (ctx, args) => {
-        const {orgId, query} = args;
+        const {orgId, query, isFavorite} = args;
         const identity = await ctx.auth.getUserIdentity();
         if(!identity){
             return [];
@@ -42,6 +43,20 @@ export const getAllFiles = query({
 
         if(query){
             files = files.filter((file) => file.fileName.toLowerCase().includes(query.toLowerCase()));
+        }
+
+        if(isFavorite){
+            const user = await ctx.db.query("users")
+                    .withIndex("by_token", (user) => user.eq("tokenIdentifier", identity.tokenIdentifier)).first();
+            
+            if(!user){
+                throw new ConvexError("No user found");
+            }
+            
+            const favorites = await ctx.db.query("favorites")
+                .withIndex("by_userId_orgId_fileId", (file) => file.eq("userId", user?._id).eq("orgId", orgId)).collect();
+
+            files = files.filter((file) => favorites.some(favorite => favorite.fileId === file._id));
         }
 
         return files;
@@ -127,8 +142,8 @@ export const toggleFavorite = mutation({
         }
 
         const favorite = await ctx.db.query("favorites")
-                        .withIndex("by_userId_orgId_fileId", (file) => file.eq("fileId", currentFile._id)
-                        .eq("orgId", currentFile.orgId).eq("userId", user?._id)).first();
+                        .withIndex("by_userId_orgId_fileId", (file) => file.eq("userId", user._id)
+                        .eq("orgId", currentFile.orgId).eq("fileId", currentFile._id)).first();
 
         if(!favorite){
             await ctx.db.insert("favorites", {

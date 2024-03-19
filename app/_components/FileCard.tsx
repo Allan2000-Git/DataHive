@@ -43,12 +43,20 @@ function FileCard({file} : {file: Doc<"files">}) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
     const deleteFile = useMutation(api.files.deleteFile);
+    const toggleFavorite = useMutation(api.files.toggleFavorite);
 
     const handleFileDelete = () => {
         deleteFile({
             fileId: file._id
         });
         toast.success(`File ${file.fileName} deleted successfully.`);
+    }
+
+    const handleToggleFavorite = () => {
+        toggleFavorite({
+            fileId: file._id
+        });
+        toast(`Added to favorites.`);
     }
 
     return (
@@ -66,6 +74,7 @@ function FileCard({file} : {file: Doc<"files">}) {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuItem
+                                onClick={handleToggleFavorite}
                                 className="flex items-center gap-3 text-yellow-600 cursor-pointer"
                                 >
                                     <StarIcon size={16} /> 

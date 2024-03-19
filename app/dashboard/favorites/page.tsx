@@ -1,9 +1,10 @@
+import AllFiles from '@/app/_components/AllFiles'
 import React from 'react'
 
 function Favorites() {
     return (
         <>
-            Favorites
+            <AllFiles title="Your Favorites" isFavorite={true} />
         </>
     )
 }
