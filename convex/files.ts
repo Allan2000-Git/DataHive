@@ -60,10 +60,11 @@ export const getAllFiles = query({
     args: {
         orgId: v.string(),
         query: v.optional(v.string()),
-        isFavorite: v.optional(v.boolean())
+        isFavorite: v.optional(v.boolean()),
+        toBeDeleted: v.optional(v.boolean())
     },
     handler: async (ctx, args) => {
-        const {orgId, query, isFavorite} = args;
+        const {orgId, query, isFavorite, toBeDeleted} = args;
         const hasAccess = await hasAccesstoOrg(ctx, args.orgId);
 
         if (!hasAccess) {
@@ -82,6 +83,12 @@ export const getAllFiles = query({
                 .withIndex("by_userId_orgId_fileId", (file) => file.eq("userId", hasAccess.user?._id).eq("orgId", orgId)).collect();
 
             files = files.filter((file) => favorites.some(favorite => favorite.fileId === file._id));
+        }
+
+        if(toBeDeleted){
+            files = files.filter((file) => file.toBeDeleted);
+        } else {
+            files = files.filter((file) => !file.toBeDeleted);
         }
 
         return files;
@@ -126,8 +133,9 @@ export const deleteFile = mutation({
             throw new ConvexError({message: "Only admin of this organization can delete files"});
         }
 
-        const file = await ctx.db.delete(fileId);
-        return file;
+        // const file = await ctx.db.delete(fileId);
+        // return file;
+        await ctx.db.patch(fileId, {toBeDeleted: true});
     },
 });
 

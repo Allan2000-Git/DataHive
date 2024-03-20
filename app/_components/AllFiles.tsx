@@ -9,9 +9,11 @@ import FileUpload from '../_components/FileUpload'
 import DashboardSkeleton from '../_components/DashboardSkeleton'
 import SearchBar from '../_components/SearchBar'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
-function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
+function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: boolean, toBeDeleted?: boolean}) {
     const [query, setQuery] = useState("");
+    const pathName = usePathname();
 
     const organization = useOrganization();
     const user = useUser();
@@ -20,7 +22,7 @@ function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
         orgId = organization.organization?.id ?? user.user?.id;
     }
 
-    const files = useQuery(api.files.getAllFiles, orgId  ? {orgId, query, isFavorite} : "skip");
+    const files = useQuery(api.files.getAllFiles, orgId  ? {orgId, query, isFavorite, toBeDeleted} : "skip");
     const favorites = useQuery(api.files.getAllFavorites, orgId  ? {orgId} : "skip");
 
     const isLoading = files === undefined;
@@ -31,8 +33,13 @@ function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
                 <div className="flex-1">
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-bold">{title}</h1>
-                        <SearchBar query={query} setQuery={setQuery} />
-                        <FileUpload />
+                        {
+                            !(pathName === "/dashboard/trash") && 
+                            <>
+                                <SearchBar query={query} setQuery={setQuery} />
+                                <FileUpload />
+                            </>
+                        }
                     </div>
                 {
                     isLoading && <DashboardSkeleton />
@@ -46,8 +53,8 @@ function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
                         width={600}
                         height={600}
                         />
-                        <h1 className="text-2xl font-bold">No files yet. Please upload one</h1>
-                        <FileUpload />
+                        <h1 className="text-2xl font-bold">{`${pathName === "/dashboard/trash" ? "No files to be deleted." : "No files yet. Please upload one"}`}</h1>
+                        {!(pathName === "/dashboard/trash") &&  <FileUpload />}
                     </div>
                 }
                 {

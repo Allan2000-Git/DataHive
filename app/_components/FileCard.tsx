@@ -50,7 +50,7 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
     const handleFileDelete = async () => {
         try {
             await deleteFile({ fileId: file._id });
-            toast.success(`File ${file.fileName} deleted successfully.`);
+            toast.success(`File ${file.fileName} has been marked to be deleted.`);
         } catch (error) {
             if (error instanceof ConvexError) {
                 toast.error((error.data as { message: string }).message);
@@ -108,8 +108,7 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                                 <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your account
-                                    and remove your data from our servers.
+                                    File deletion isn't instant. It takes a few days, during which you can still restore your data.
                                 </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
