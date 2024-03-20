@@ -3,7 +3,7 @@ import AllFiles from "@/app/_components/AllFiles"
 function Files() {
     return (
         <>
-            <AllFiles title="Yoour Files" />
+            <AllFiles title="Your Files" />
         </>
     )
 }

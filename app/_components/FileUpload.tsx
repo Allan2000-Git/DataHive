@@ -55,8 +55,8 @@ function FileUpload() {
         orgId = organization.organization?.id ?? user.user?.id;
     }
 
-    const createFile = useMutation(api.files.createFile);
     const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+    const createFile = useMutation(api.files.createFile);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

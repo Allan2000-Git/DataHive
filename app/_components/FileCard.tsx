@@ -32,6 +32,8 @@ import { api } from "@/convex/_generated/api"
 import { toast } from "sonner";
 import Image from "next/image";
 import { getFileUrl } from "@/lib/fileUrl"
+import { Protect } from "@clerk/nextjs"
+import { ConvexError } from "convex/values"
 
 const iconTypes= {
     image: <ImageIcon size={18} />,
@@ -39,17 +41,23 @@ const iconTypes= {
     pdf:  <FileTextIcon size={18} />
 } as Record<Doc<"files">["fileType"], ReactNode>;
 
-function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favorites">[]}) {
+function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favorites">[] | undefined}) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
     const deleteFile = useMutation(api.files.deleteFile);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
 
-    const handleFileDelete = () => {
-        deleteFile({
-            fileId: file._id
-        });
-        toast.success(`File ${file.fileName} deleted successfully.`);
+    const handleFileDelete = async () => {
+        try {
+            await deleteFile({ fileId: file._id });
+            toast.success(`File ${file.fileName} deleted successfully.`);
+        } catch (error) {
+            if (error instanceof ConvexError) {
+                toast.error((error.data as { message: string }).message);
+            } else {
+                toast.error("An error occurred while deleting the file.");
+            }
+        }        
     }
 
     const handleToggleFavorite = () => {
@@ -59,7 +67,7 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
         toast(`${isFavorite ? "Removed" : "Added"} to favorites.`);
     }
 
-    const isFavorite = favorites.some((favorite) => favorite.fileId === file._id);
+    const isFavorite = favorites?.some((favorite) => favorite.fileId === file._id);
 
     return (
         <Card className="flex flex-col justify-between">
@@ -91,8 +99,8 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                                 className="flex items-center gap-3 text-red-600 cursor-pointer"
                                 >
                                     <TrashIcon size={16} /> 
-                                    Delete
-                                </DropdownMenuItem>
+                                Delete
+                            </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
@@ -146,7 +154,7 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                 </CardContent>
             </div>
             <CardFooter>
-                <Button>Download</Button>
+                <Button onClick={() => window.open(getFileUrl(file.fileId), '_blank')}>Download</Button>
             </CardFooter>
         </Card>
     )
