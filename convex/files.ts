@@ -158,3 +158,33 @@ export const toggleFavorite = mutation({
         return favorite;
     },
 });
+
+export const getAllFavorites = query({
+    args: {
+        orgId: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const {orgId} = args;
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            return [];
+        }
+
+        const hasAccess = await hasAccesstoOrg(ctx, identity.tokenIdentifier, orgId);
+        if(!hasAccess){
+            throw new ConvexError("You do not have access to the files in this organization");
+        }
+
+        const user = await ctx.db.query("users")
+                    .withIndex("by_token", (user) => user.eq("tokenIdentifier", identity.tokenIdentifier)).first();
+        
+        if(!user){
+            throw new ConvexError("No user found");
+        }
+
+        const favorites = await ctx.db.query("favorites")
+                        .withIndex("by_userId_orgId_fileId", (file) => file.eq("userId", user._id).eq("orgId", orgId)).collect();
+        
+        return favorites;
+    },
+});

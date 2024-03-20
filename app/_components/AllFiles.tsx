@@ -21,6 +21,7 @@ function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
     }
 
     const files = useQuery(api.files.getAllFiles, orgId  ? {orgId, query, isFavorite} : "skip");
+    const favorites = useQuery(api.files.getAllFavorites, orgId  ? {orgId} : "skip");
 
     const isLoading = files === undefined;
 
@@ -54,7 +55,7 @@ function AllFiles({title, isFavorite}:{title: string, isFavorite?: boolean}) {
                     <div className="mt-7 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 gap-5 w-full">
                         {
                             files?.map((file) => (
-                                <FileCard key={file._id} file={file} />
+                                <FileCard favorites={favorites} key={file._id} file={file} />
                             ))
                         }
                     </div>

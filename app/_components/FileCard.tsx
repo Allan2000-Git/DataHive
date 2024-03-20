@@ -24,8 +24,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Doc } from "@/convex/_generated/dataModel"
-import { EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, StarIcon, TrashIcon } from "lucide-react"
+import { Doc, Id } from "@/convex/_generated/dataModel"
+import { EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
 import { ReactNode, useState } from "react"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
@@ -39,7 +39,7 @@ const iconTypes= {
     pdf:  <FileTextIcon size={18} />
 } as Record<Doc<"files">["fileType"], ReactNode>;
 
-function FileCard({file} : {file: Doc<"files">}) {
+function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favorites">[]}) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
     const deleteFile = useMutation(api.files.deleteFile);
@@ -56,8 +56,10 @@ function FileCard({file} : {file: Doc<"files">}) {
         toggleFavorite({
             fileId: file._id
         });
-        toast(`Added to favorites.`);
+        toast(`${isFavorite ? "Removed" : "Added"} to favorites.`);
     }
+
+    const isFavorite = favorites.some((favorite) => favorite.fileId === file._id);
 
     return (
         <Card className="flex flex-col justify-between">
@@ -77,8 +79,12 @@ function FileCard({file} : {file: Doc<"files">}) {
                                 onClick={handleToggleFavorite}
                                 className="flex items-center gap-3 text-yellow-600 cursor-pointer"
                                 >
-                                    <StarIcon size={16} /> 
-                                    Favorite
+                                    {
+                                        isFavorite ? <SparklesIcon size={16} />  : <StarIcon size={16} />
+                                    }
+                                    {
+                                        isFavorite ? "Unfavorite" : "Favorite"
+                                    }
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                 onClick={() => setIsAlertOpen(true)}
