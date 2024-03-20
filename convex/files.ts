@@ -1,5 +1,5 @@
 import { Doc, Id } from "./_generated/dataModel";
-import { MutationCtx, QueryCtx, mutation, query } from "./_generated/server";
+import { MutationCtx, QueryCtx, internalMutation, mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 
 export const generateUploadUrl = mutation(async (ctx) => {
@@ -136,6 +136,41 @@ export const deleteFile = mutation({
         // const file = await ctx.db.delete(fileId);
         // return file;
         await ctx.db.patch(fileId, {toBeDeleted: true});
+    },
+});
+
+export const restoreFile = mutation({
+    args: {
+        fileId: v.id("files")
+    },
+    handler: async (ctx, args) => {
+        const {fileId} = args;
+        const hasAccess = await hasAccessToFile(ctx, fileId);
+
+        if (!hasAccess) {
+            throw new ConvexError({message: "No access to file"});
+        }
+        
+        const isAdmin = hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)?.role === "admin";
+        if(!isAdmin){
+            throw new ConvexError({message: "Only admin of this organization can delete files"});
+        }
+
+        await ctx.db.patch(fileId, {toBeDeleted: false});
+    },
+});
+
+// CRON job
+export const deleteAllFiles = internalMutation({
+    args: {},
+    handler: async (ctx, args) => {
+        const files = await ctx.db.query("files")
+                        .withIndex("by_toBeDeleted", (file) => file.eq("toBeDeleted", true)).collect();
+
+        await Promise.all(files.map(async(file) => {
+            await ctx.storage.delete(file.fileId);
+            return await ctx.db.delete(file._id)
+        }));
     },
 });
 

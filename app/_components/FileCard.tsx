@@ -25,7 +25,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Doc, Id } from "@/convex/_generated/dataModel"
-import { EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
+import { ArchiveRestoreIcon, EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
 import { ReactNode, useState } from "react"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
@@ -45,6 +45,7 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
     const deleteFile = useMutation(api.files.deleteFile);
+    const restoreFile = useMutation(api.files.restoreFile);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
 
     const handleFileDelete = async () => {
@@ -59,6 +60,19 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
             }
         }        
     }
+
+    const handleFileRestore = async () => {
+        try {
+            await restoreFile({ fileId: file._id });
+            toast.success(`File ${file.fileName} has been restored`);
+        } catch (error) {
+            if (error instanceof ConvexError) {
+                toast.error((error.data as { message: string }).message);
+            } else {
+                toast.error("An error occurred while deleting the file.");
+            }
+        }        
+    } 
 
     const handleToggleFavorite = () => {
         toggleFavorite({
@@ -95,12 +109,31 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                                     }
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                onClick={() => setIsAlertOpen(true)}
-                                className="flex items-center gap-3 text-red-600 cursor-pointer"
+                                onClick={() =>{
+                                    if(file.toBeDeleted){
+                                        handleFileRestore();
+                                    }else{
+                                        setIsAlertOpen(true);
+                                    }
+                                }}
                                 >
-                                    <TrashIcon size={16} /> 
-                                Delete
-                            </DropdownMenuItem>
+                                    {
+                                        !file.toBeDeleted ?
+                                        <>
+                                            <div className="flex items-center gap-3 text-red-600 cursor-pointer">
+                                                <TrashIcon size={16} /> 
+                                                Delete
+                                            </div>
+                                        </>
+                                        :
+                                        <>
+                                            <div className="flex items-center gap-3 text-green-600 cursor-pointer">
+                                                <ArchiveRestoreIcon size={16} /> 
+                                                Restore
+                                            </div>
+                                        </>
+                                    }
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
