@@ -1,5 +1,5 @@
 "use client"
-import { Button } from "@/components/ui/button"
+import  moment from 'moment';
 import {
     Card,
     CardContent,
@@ -25,15 +25,16 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Doc, Id } from "@/convex/_generated/dataModel"
-import { ArchiveRestoreIcon, EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
+import { ArchiveRestoreIcon, DownloadIcon, EllipsisVertical, FileTextIcon, ImageIcon,SheetIcon, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
 import { ReactNode, useState } from "react"
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { toast } from "sonner";
 import Image from "next/image";
-import { getFileUrl } from "@/lib/fileUrl"
+import { getFileImage, getFileUrl } from "@/lib/fileUrl"
 import { Protect } from "@clerk/nextjs"
 import { ConvexError } from "convex/values"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const iconTypes= {
     image: <ImageIcon size={18} />,
@@ -47,6 +48,8 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
     const deleteFile = useMutation(api.files.deleteFile);
     const restoreFile = useMutation(api.files.restoreFile);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
+
+    const user = useQuery(api.users.getUserDetails, {userId: file.userId});
 
     const handleFileDelete = async () => {
         try {
@@ -83,8 +86,21 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
 
     const isFavorite = favorites?.some((favorite) => favorite.fileId === file._id);
 
+    // Assuming file._creationTime is a timestamp or a Date object
+    const creationTime = moment(file._creationTime);
+    const now = moment();
+
+    let displayTime;
+    if (now.diff(creationTime, 'days') >= 1) {
+        // If the difference is more than or equal to 1 day, display the date
+        displayTime = creationTime.format('MMMM Do YYYY');
+    } else {
+        // Otherwise, display relative time
+        displayTime = creationTime.fromNow();
+    }
+
     return (
-        <Card className="flex flex-col justify-between">
+        <Card className="flex flex-col justify-between gap-3">
             <div>
                 <CardHeader>
                     <div className="flex items-center gap-3 justify-between">
@@ -134,6 +150,12 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                                         </>
                                     }
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                onClick={() => window.open(getFileUrl(file.fileId), '_blank')}
+                                className="flex items-center gap-3 cursor-pointer"
+                                >
+                                    <DownloadIcon size={16} /> Download
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
@@ -156,8 +178,8 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                     {
                         file.fileType === "image" && 
                         <Image 
-                        className="object-cover"
-                        src={getFileUrl(file.fileId)}
+                        className="object-cover w-full h-full"
+                        src={getFileImage(file.fileId)}
                         alt={file.fileName}
                         width={300}
                         height={80}
@@ -185,8 +207,15 @@ function FileCard({file, favorites} : {file: Doc<"files">, favorites: Doc<"favor
                     }
                 </CardContent>
             </div>
-            <CardFooter>
-                <Button onClick={() => window.open(getFileUrl(file.fileId), '_blank')}>Download</Button>
+            <CardFooter className="flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                    <Avatar className="w-6 h-6">
+                        <AvatarImage src={user?.image} />
+                        <AvatarFallback>{user?.name}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{user?.name}</span>
+                </div>
+                <span className="text-sm text-gray-500">{displayTime}</span>
             </CardFooter>
         </Card>
     )

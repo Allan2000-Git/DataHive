@@ -25,17 +25,17 @@ http.route({
             case "user.created":
                 await ctx.runMutation(internal.users.createUser, {
                     tokenIdentifier: `https://normal-dory-58.clerk.accounts.dev|${result.data.id}`,
+                    name: `${result.data.first_name} ${result.data.last_name}`,
+                    image: result.data.image_url
                 });
                 break;
-            // case "user.updated":
-            //     await ctx.runMutation(internal.users.updateUser, {
-            //         tokenIdentifier: `https://${process.env.CLERK_HOSTNAME}|${result.data.id}`,
-            //         name: `${result.data.first_name ?? ""} ${
-            //         result.data.last_name ?? ""
-            //         }`,
-            //         image: result.data.image_url,
-            //     });
-            //     break;
+            case "user.updated":
+                await ctx.runMutation(internal.users.updateUser, {
+                    tokenIdentifier: `https://normal-dory-58.clerk.accounts.dev|${result.data.id}`,
+                    name: `${result.data.first_name} ${result.data.last_name}`,
+                    image: result.data.image_url,
+                });
+                break;
             case "organizationMembership.created":
                 await ctx.runMutation(internal.users.addOrgIdToUser, {
                     tokenIdentifier: `https://normal-dory-58.clerk.accounts.dev|${result.data.public_user_data.user_id}`,
@@ -60,6 +60,23 @@ http.route({
             status: 400,
         });
         }
+    }),
+});
+
+http.route({
+    path: "/getImage",
+    method: "GET",
+    handler: httpAction(async (ctx, request) => {
+        const { searchParams } = new URL(request.url);
+        // This storageId param should be an Id<"_storage">
+        const storageId = searchParams.get("storageId")!;
+        const blob = await ctx.storage.get(storageId);
+        if (blob === null) {
+            return new Response("Image not found", {
+            status: 404,
+            });
+        }
+        return new Response(blob);
     }),
 });
 

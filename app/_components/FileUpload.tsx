@@ -81,6 +81,8 @@ function FileUpload() {
 
         const { storageId } = await result.json();
 
+        console.log(storageId);
+
         try {
             await createFile({
                 fileName: values.title,

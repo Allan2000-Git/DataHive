@@ -5,6 +5,7 @@ export default defineSchema({
     files: defineTable({
         fileName: v.string(),
         fileId: v.id("_storage"),
+        userId: v.id("users"),
         orgId: v.string(),
         fileType: v.union(v.literal("image"), v.literal("pdf"), v.literal("csv")),
         toBeDeleted: v.optional(v.boolean())
@@ -16,6 +17,8 @@ export default defineSchema({
             orgId: v.string(),
             role: v.union(v.literal("admin"), v.literal("member"))
         })),
+        name: v.optional(v.string()),
+        image: v.optional(v.string()),
     }).index("by_token", ["tokenIdentifier"]),
 
     favorites: defineTable({

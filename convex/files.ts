@@ -110,7 +110,7 @@ export const createFile = mutation({
         throw new ConvexError("you do not have access to this org");
         }
 
-        const file = await ctx.db.insert('files', {fileName, fileId, orgId, fileType});
+        const file = await ctx.db.insert('files', {fileName, fileId, orgId, fileType, userId: hasAccess.user._id});
         return file;
     },
 });
