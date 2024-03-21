@@ -93,6 +93,9 @@ export const getUserDetails = query({
     handler: async (ctx, args) => {
         const {userId} = args;
         const user = await ctx.db.get(userId);
+        if(!user){
+            return null;
+        }
         return user;
     },
 });
