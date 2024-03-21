@@ -27,6 +27,7 @@ import { useState } from 'react'
 import { toast } from "sonner";
 import { LoaderCircle } from 'lucide-react'
 import { Doc } from '@/convex/_generated/dataModel'
+import { ConvexError } from 'convex/values'
 
 // https://medium.com/@damien_16960/input-file-x-shadcn-x-zod-88f0472c2b81
 
@@ -97,8 +98,12 @@ function FileUpload() {
 
             form.reset();
         } catch (error) {
-            toast.error(`File could not be uploaded.`);
-        }
+            if (error instanceof ConvexError) {
+                toast.error((error.data as { message: string }).message);
+            } else {
+                toast.error("An error occurred while uploading the file.");
+            }
+        }    
     }
 
     const fileRef = form.register("file");
