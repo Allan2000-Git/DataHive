@@ -33,7 +33,7 @@ export const columns: ColumnDef<Doc<"files"> & {isFavorite: boolean}>[] = [
     {
         header: "Uploaded on",
         cell: ({ row }) => {
-            return <div className="text-right font-medium">{formatDate(row.original._creationTime)}</div>
+            return <div className="font-medium">{formatDate(row.original._creationTime)}</div>
         },
     },
     {
