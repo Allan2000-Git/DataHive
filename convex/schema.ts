@@ -8,7 +8,8 @@ export default defineSchema({
         userId: v.id("users"),
         orgId: v.string(),
         fileType: v.union(v.literal("image"), v.literal("pdf"), v.literal("csv")),
-        toBeDeleted: v.optional(v.boolean())
+        toBeDeleted: v.optional(v.boolean()),
+        fileTypeQuery: v.optional(v.string()),
     }).index("by_orgid", ["orgId"]).index("by_toBeDeleted", ["toBeDeleted"]),
 
     users: defineTable({

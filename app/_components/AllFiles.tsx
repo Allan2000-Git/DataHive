@@ -14,9 +14,18 @@ import { DataTable } from './FileTable'
 import { columns } from './Columns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LayoutGridIcon, Table2Icon } from 'lucide-react'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: boolean, toBeDeleted?: boolean}) {
     const [query, setQuery] = useState("");
+    const [fileTypeQuery, setFileTypeQuery] = useState("all");
+
     const pathName = usePathname();
 
     const organization = useOrganization();
@@ -26,7 +35,7 @@ function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: 
         orgId = organization.organization?.id ?? user.user?.id;
     }
 
-    const files = useQuery(api.files.getAllFiles, orgId  ? {orgId, query, isFavorite, toBeDeleted} : "skip");
+    const files = useQuery(api.files.getAllFiles, orgId  ? {orgId, query, isFavorite, toBeDeleted, fileTypeQuery} : "skip");
     const favorites = useQuery(api.files.getAllFavorites, orgId  ? {orgId} : "skip");
 
     const newFilesAfterFavorite = files?.map(file => ({
@@ -50,39 +59,52 @@ function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: 
                             </>
                         }
                     </div>
-                    <Tabs defaultValue="grid" className="w-full mt-5">
-                        <TabsList>
-                            <TabsTrigger value="grid">
-                                <div className="flex items-center gap-2 text-sm">
-                                    <LayoutGridIcon size={16} />
-                                    Grid
-                                </div>
-                            </TabsTrigger>
-                            <TabsTrigger value="table">
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Table2Icon size={16} />
-                                    Table
-                                </div>
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="grid">
-                            {
-                                files && files?.length > 0 && 
-                                <div className="mt-5 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 gap-5 w-full">
-                                    {
-                                        newFilesAfterFavorite?.map((file) => (
-                                            <FileCard key={file._id} file={{ ...file, isFavorite: file.isFavorite ?? false }} />
-                                        ))
-                                    }
-                                </div>
-                            }
-                        </TabsContent>
-                        <TabsContent value="table">
-                            <div className="mt-5">
-                                <DataTable columns={columns} data={newFilesAfterFavorite ?? []} />
+                        <Tabs defaultValue="grid" className="w-full mt-5">
+                            <div className="flex items-center justify-between">
+                                <TabsList>
+                                    <TabsTrigger value="grid">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <LayoutGridIcon size={16} />
+                                            Grid
+                                        </div>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="table">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Table2Icon size={16} />
+                                            Table
+                                        </div>
+                                    </TabsTrigger>
+                                </TabsList>
+                                <Select value={fileTypeQuery} onValueChange={setFileTypeQuery}>
+                                    <SelectTrigger className="w-[150px]" defaultValue={"all"}>
+                                        <SelectValue placeholder="All" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All</SelectItem>
+                                        <SelectItem value="image">Image</SelectItem>
+                                        <SelectItem value="pdf">PDF</SelectItem>
+                                        <SelectItem value="csv">CSV</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        </TabsContent>
-                    </Tabs>
+                            <TabsContent value="grid">
+                                {
+                                    files && files?.length > 0 && 
+                                    <div className="mt-5 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 gap-5 w-full">
+                                        {
+                                            newFilesAfterFavorite?.map((file) => (
+                                                <FileCard key={file._id} file={{ ...file, isFavorite: file.isFavorite ?? false }} />
+                                            ))
+                                        }
+                                    </div>
+                                }
+                            </TabsContent>
+                            <TabsContent value="table">
+                                <div className="mt-5">
+                                    <DataTable columns={columns} data={newFilesAfterFavorite ?? []} />
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     {
                         isLoading && <DashboardSkeleton />
                     }

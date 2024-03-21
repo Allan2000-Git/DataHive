@@ -61,10 +61,11 @@ export const getAllFiles = query({
         orgId: v.string(),
         query: v.optional(v.string()),
         isFavorite: v.optional(v.boolean()),
-        toBeDeleted: v.optional(v.boolean())
+        toBeDeleted: v.optional(v.boolean()),
+        fileTypeQuery: v.optional(v.string())
     },
     handler: async (ctx, args) => {
-        const {orgId, query, isFavorite, toBeDeleted} = args;
+        const {orgId, query, isFavorite, toBeDeleted, fileTypeQuery} = args;
         const hasAccess = await hasAccesstoOrg(ctx, args.orgId);
 
         if (!hasAccess) {
@@ -89,6 +90,12 @@ export const getAllFiles = query({
             files = files.filter((file) => file.toBeDeleted);
         } else {
             files = files.filter((file) => !file.toBeDeleted);
+        }
+
+        if(fileTypeQuery === "all"){
+            return files;
+        } else {
+            files = files.filter((file) => file.fileType === fileTypeQuery);
         }
 
         return files;
