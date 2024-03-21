@@ -12,6 +12,8 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { DataTable } from './FileTable'
 import { columns } from './Columns'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { LayoutGridIcon, Table2Icon } from 'lucide-react'
 
 function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: boolean, toBeDeleted?: boolean}) {
     const [query, setQuery] = useState("");
@@ -48,33 +50,55 @@ function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: 
                             </>
                         }
                     </div>
-                {
-                    isLoading && <DashboardSkeleton />
-                }
-                {
-                    files?.length === 0 && 
-                    <div className="w-full h-full flex flex-1 flex-col justify-center items-center py-14 gap-10">
-                        <Image 
-                        src="/empty-state.svg"
-                        alt="Empty State - No files"
-                        width={600}
-                        height={600}
-                        />
-                        <h1 className="text-2xl font-bold">{`${pathName === "/dashboard/trash" ? "No files to be deleted." : "No files yet. Please upload one"}`}</h1>
-                        {!(pathName === "/dashboard/trash") &&  <FileUpload />}
-                    </div>
-                }
-                {
-                    files && files?.length > 0 && 
-                    <div className="mt-7 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 gap-5 w-full">
-                        {
-                            newFilesAfterFavorite?.map((file) => (
-                                <FileCard key={file._id} file={{ ...file, isFavorite: file.isFavorite ?? false }} />
-                            ))
-                        }
-                    </div>
-                }
-                <DataTable columns={columns} data={newFilesAfterFavorite ?? []} />
+                    <Tabs defaultValue="grid" className="w-full mt-5">
+                        <TabsList>
+                            <TabsTrigger value="grid">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <LayoutGridIcon size={16} />
+                                    Grid
+                                </div>
+                            </TabsTrigger>
+                            <TabsTrigger value="table">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Table2Icon size={16} />
+                                    Table
+                                </div>
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="grid">
+                            {
+                                files && files?.length > 0 && 
+                                <div className="mt-5 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 gap-5 w-full">
+                                    {
+                                        newFilesAfterFavorite?.map((file) => (
+                                            <FileCard key={file._id} file={{ ...file, isFavorite: file.isFavorite ?? false }} />
+                                        ))
+                                    }
+                                </div>
+                            }
+                        </TabsContent>
+                        <TabsContent value="table">
+                            <div className="mt-5">
+                                <DataTable columns={columns} data={newFilesAfterFavorite ?? []} />
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                    {
+                        isLoading && <DashboardSkeleton />
+                    }
+                    {
+                        files?.length === 0 && 
+                        <div className="w-full h-full flex flex-1 flex-col justify-center items-center py-14 gap-10">
+                            <Image 
+                            src="/empty-state.svg"
+                            alt="Empty State - No files"
+                            width={600}
+                            height={600}
+                            />
+                            <h1 className="text-2xl font-bold">{`${pathName === "/dashboard/trash" ? "No files to be deleted." : "No files yet. Please upload one"}`}</h1>
+                            {!(pathName === "/dashboard/trash") &&  <FileUpload />}
+                        </div>
+                    }
                 </div>
             </div>
         </>
