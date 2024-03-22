@@ -14,6 +14,25 @@ export async function getUser(ctx: QueryCtx | MutationCtx, tokenIdentifier: stri
     return user;
 }
 
+export const getCurrentUser = query({
+    args: {},
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+
+        if (!identity) {
+            return null;
+        }
+
+        const user = await getUser(ctx, identity.tokenIdentifier);
+
+        if (!user) {
+            return null;
+        }
+
+        return user;
+    },
+});
+
 export const createUser = internalMutation({
     args: {
         tokenIdentifier: v.string(),

@@ -42,6 +42,9 @@ const formSchema = z.object({
 
 const types= {
     "image/png": "image",
+    "image/webp": "image",
+    "image/svg+xml": "image",
+    "image/jpeg": "image",
     "text/csv": "csv",
     "application/pdf": "pdf",
 } as Record<string, Doc<"files">["fileType"]>;
@@ -68,7 +71,6 @@ function FileUpload() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
 
         if(!orgId) return toast.success(`No organization found.`);
 
@@ -82,7 +84,7 @@ function FileUpload() {
 
         const { storageId } = await result.json();
 
-        console.log(storageId);
+        console.log(fileType)
 
         try {
             await createFile({

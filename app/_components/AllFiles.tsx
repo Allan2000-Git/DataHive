@@ -110,7 +110,7 @@ function AllFiles({title, isFavorite, toBeDeleted}:{title: string, isFavorite?: 
                     }
                     {
                         files?.length === 0 && 
-                        <div className="w-full h-full flex flex-1 flex-col justify-center items-center py-14 gap-10">
+                        <div className="w-full h-full flex flex-1 flex-col justify-center items-center gap-7">
                             <Image 
                             src="/empty-state.svg"
                             alt="Empty State - No files"

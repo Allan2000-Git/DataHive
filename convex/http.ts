@@ -68,7 +68,6 @@ http.route({
     method: "GET",
     handler: httpAction(async (ctx, request) => {
         const { searchParams } = new URL(request.url);
-        // This storageId param should be an Id<"_storage">
         const storageId = searchParams.get("storageId")!;
         const blob = await ctx.storage.get(storageId);
         if (blob === null) {

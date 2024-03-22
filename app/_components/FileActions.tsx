@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArchiveRestoreIcon, DownloadIcon, EllipsisVertical, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
 import { toast } from "sonner";
-import { Protect, useUser } from "@clerk/nextjs"
+import { Protect } from "@clerk/nextjs"
 import { ConvexError } from "convex/values"
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Doc } from "@/convex/_generated/dataModel"
 import { getFileImage } from '@/lib/fileUrl';
@@ -27,7 +27,7 @@ import { getFileImage } from '@/lib/fileUrl';
 function FileActions({isFavorite, file}:{isFavorite: boolean | undefined, file: Doc<"files">}) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
-    const {user} = useUser();
+    const currentUser = useQuery(api.users.getCurrentUser);
 
     const deleteFile = useMutation(api.files.deleteFile);
     const restoreFile = useMutation(api.files.restoreFile);
@@ -90,7 +90,7 @@ function FileActions({isFavorite, file}:{isFavorite: boolean | undefined, file: 
                             check({
                                 role: "org:admin",
                             }) ||
-                            user?.id === file.userId
+                            currentUser?._id === file.userId
                         )
                     }}
                     fallback={<></>}
