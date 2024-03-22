@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ArchiveRestoreIcon, DownloadIcon, EllipsisVertical, SparklesIcon, StarIcon, TrashIcon } from "lucide-react"
 import { toast } from "sonner";
-import { Protect } from "@clerk/nextjs"
+import { Protect, useUser } from "@clerk/nextjs"
 import { ConvexError } from "convex/values"
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -26,6 +26,8 @@ import { getFileImage } from '@/lib/fileUrl';
 
 function FileActions({isFavorite, file}:{isFavorite: boolean | undefined, file: Doc<"files">}) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+    const {user} = useUser();
 
     const deleteFile = useMutation(api.files.deleteFile);
     const restoreFile = useMutation(api.files.restoreFile);
@@ -64,8 +66,6 @@ function FileActions({isFavorite, file}:{isFavorite: boolean | undefined, file: 
         toast(`${isFavorite ? "Removed" : "Added"} to favorites.`);
     }
 
-    
-
     return (
         <>
             <DropdownMenu>
@@ -84,32 +84,44 @@ function FileActions({isFavorite, file}:{isFavorite: boolean | undefined, file: 
                             isFavorite ? "Unfavorite" : "Favorite"
                         }
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
-                    onClick={() =>{
-                        if(file.toBeDeleted){
-                            handleFileRestore();
-                        }else{
-                            setIsAlertOpen(true);
-                        }
+                    <Protect
+                    condition={(check) => {
+                        return(
+                            check({
+                                role: "org:admin",
+                            }) ||
+                            user?.id === file.userId
+                        )
                     }}
+                    fallback={<></>}
                     >
-                        {
-                            !file.toBeDeleted ?
-                            <>
-                                <div className="flex items-center gap-3 text-red-600 cursor-pointer">
-                                    <TrashIcon size={16} /> 
-                                    Delete
-                                </div>
-                            </>
-                            :
-                            <>
-                                <div className="flex items-center gap-3 text-green-600 cursor-pointer">
-                                    <ArchiveRestoreIcon size={16} /> 
-                                    Restore
-                                </div>
-                            </>
-                        }
-                    </DropdownMenuItem>
+                        <DropdownMenuItem 
+                        onClick={() =>{
+                            if(file.toBeDeleted){
+                                handleFileRestore();
+                            }else{
+                                setIsAlertOpen(true);
+                            }
+                        }}
+                        >
+                            {
+                                !file.toBeDeleted ?
+                                <>
+                                    <div className="flex items-center gap-3 text-red-600 cursor-pointer">
+                                        <TrashIcon size={16} /> 
+                                        Delete
+                                    </div>
+                                </>
+                                :
+                                <>
+                                    <div className="flex items-center gap-3 text-green-600 cursor-pointer">
+                                        <ArchiveRestoreIcon size={16} /> 
+                                        Restore
+                                    </div>
+                                </>
+                            }
+                        </DropdownMenuItem>
+                    </Protect>
                     <DropdownMenuItem
                     onClick={() => window.open(getFileImage(file.fileId), '_blank')}
                     className="flex items-center gap-3 cursor-pointer"
